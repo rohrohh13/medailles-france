@@ -1,0 +1,326 @@
+#root {
+  width: 100%;
+}
+
+.social-icon {
+  color: inherit; /* Hérite de la couleur du texte */
+  transition: transform 0.3s, color 0.3s;
+}
+
+.social-icon:hover {
+  transform: scale(1.2); /* Agrandit l'icône */
+  color: #007bff; /* Change la couleur au survol */
+}
+
+/* app.css */
+.medal-container {
+  gap: 10px;
+}
+
+.medal {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 18px;
+  cursor: pointer;
+  border: 2px solid #ddd;
+  color: white;
+  background-color: black; /* Fond noir par défaut */
+  transition: background-color 0.3s; /* Transition douce pour le changement de couleur */
+}
+
+.medal-gold.active {
+  background-color: #ffd700;
+}
+
+.medal-silver.active {
+  background-color: #868992;
+}
+
+.medal-bronze.active {
+  background-color: #775e39;
+}
+
+.medal-container-div {
+  display: flex;
+}
+
+
+
+.medal-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: white;
+  font-weight: bold;
+  margin-right: 5px;
+}
+.medal-circle-compteur {
+display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  font-size: 85px;
+  color: white;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: bold;
+  margin-right: 5px;
+  line-height: 0;
+}
+
+.filtre-medaille {
+  font-family: 'Barlow Condensed', sans-serif;
+  color: white;
+  font-size: 30px;
+}
+.marker-cluster div {
+  color: #fff;
+  font-family: 'Barlow Condensed', sans-serif ! important;
+}
+
+.droite-liste {
+  width: 50%;
+  height: 100vh;
+  overflow: scroll;
+
+}
+
+.liste-sportif {
+  padding: 0;
+  list-style: none;
+}
+
+.liste-sportif li {
+  color: #ffffff;
+  font-weight: 300;
+}
+.liste-sportif li:hover {
+  text-decoration: underline;
+}
+
+.medal-circle-gold {
+  background-color: #ffd700;
+}
+
+.medal-circle-silver {
+  background-color: #868992;
+}
+
+.medal-circle-bronze {
+  background-color: #775e39; /* Couleur bronze */
+}
+
+
+.button-filtre {
+  position: absolute;
+  top: 20px;
+  z-index: 999;
+  right: 20px;
+}
+
+.button-home {
+  position: absolute;
+  top: 20px;
+  z-index: 999;
+  right: 90px;
+}
+
+.la-liste {
+  background-color: #000000;
+  width: 100%;
+}
+.gauche-liste {
+  width: 50%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.bloc-medaille {
+  display: flex;
+  justify-content: space-between;
+}
+
+
+.total-medaille {
+  color: #ffffff;
+  font-size: 66px;
+  margin: 0;
+  font-family: 'Barlow Condensed', sans-serif;
+}
+
+
+.intro-droite {
+  color: #ffffff;
+}
+
+.titre-droite {
+  color: #ffffff;
+}
+
+.bloc-medaille {
+  display: flex;
+}
+
+.bloc-medaille p {
+margin: 0;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 40px;
+  max-width: 250px;
+  width: 250px;
+  line-height: 114%;
+}
+
+.bloc-medaille-div {
+  display: flex;
+  border-bottom: 1px solid #fff;
+  justify-content: space-between;
+  padding-bottom: 20px;
+  padding-top: 20px;
+}
+
+.bloc-medaille-div-annee {
+  color: #ffffff;
+  padding-right: 20px;
+}
+
+
+.filter-button {
+  background-color: #000000;
+  border: 1px solid #000000;
+  border-radius: 4px;
+  padding: 5px 5px;
+  margin: 4px;
+  cursor: pointer;
+  color: #ffffff;
+  transition: background-color 0.3s ease;
+  font-size: 12px;
+}
+
+.filter-button.active {
+  background-color: #ffffff;
+  color: #000000;
+  border-color: #000000;
+}
+
+.filter-button:hover {
+  background-color: #ffd700;
+  border-color: #000000;
+}
+
+
+.marker-cluster-large,
+.marker-cluster-medium,
+.marker-cluster-small {
+background-color: rgba(0, 0, 0, 0.6) ! important;
+}
+
+.marker-cluster-large div,
+.marker-cluster-medium div,
+.marker-cluster-small div {
+background-color: rgba(0, 0, 0, 0.6) ! important;
+}
+
+
+
+
+.ouvertureSite {
+  background-color: #000000;
+  display: block;
+}
+
+
+.ouvertureSite .MuiPaper-root {
+  margin: unset ! important;
+  height: auto ! important;
+  margin: unset ! important;
+  width: 100% ! important;
+  background-color: unset ! important;
+  height: auto ! important;
+  max-width: unset ! important;
+}
+
+.ouvertureSite .MuiPaper-root h1 {
+  color: #ffffff;
+  font-family: 'Barlow Condensed', sans-serif;
+  text-align: center;
+  font-size: 50px;
+  margin-bottom: 60px;
+}
+
+.le-choix {
+  display: flex;
+  justify-content: center;
+}
+
+.le-choix div {
+  background-color: #ffffff;
+  cursor: pointer;
+  margin-left: 20px;
+  margin-right: 20px;
+  border: 1px solid #ffffff;
+  font-family: 'Barlow Condensed', sans-serif;
+  padding: 20px;
+  border-radius: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  transition: all 0.3s;
+}
+
+
+.le-choix div:hover {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+
+
+.custom-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 25px ! important;
+  height: 25px ! important;
+  border-radius: 50%;
+  background-color: #fff;
+  border: 2px solid #000;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.marker-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+
+
+.popUpCarte h3 {
+  font-size: 14px ! important;
+  margin: 0 ! important;
+  padding-bottom: 10px;
+}
+
+.popUpCarte ul {
+  margin-top: 0;
+}
+.popUpCarte ul li {
+  font-size: 12px;
+  padding-bottom: 5px;
+
+  margin: 0 ! important;
+}
