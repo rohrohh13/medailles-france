@@ -305,7 +305,7 @@ const createCustomIcon = (gender, discipline) => {
           <button className="button-home" onClick={handleHomeButtonClick}>
             <HomeIcon />
           </button>
-          <button className="button-info" onClick={handleInfoDrawerToggle}>
+          <button className="button-info" onClick={handleInfoDrawerToggle} style={{ display: 'none' }}>
             <InfoIcon />
           </button>
 
