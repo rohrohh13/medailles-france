@@ -309,7 +309,7 @@ const createCustomIcon = (gender, discipline) => {
             <InfoIcon />
           </button>
 
-          <div style={{ display: 'flex' }}>
+          <div className="div-not-flex" style={{ display: 'flex' }}>
             {viewMode === 'list' && (
               <div className="gauche-liste" style={{ width: '50%' }}>
                 <p className="total-medaille">{totalMedals} médailles</p>
@@ -542,7 +542,7 @@ const createCustomIcon = (gender, discipline) => {
             variant="temporary"
             transitionDuration={300}
           >
-            <div style={{ width: '400px', padding: '20px', position: 'relative' }}>
+            <div className="drawer-filter" style={{ width: '400px', padding: '20px', position: 'relative' }}>
               <IconButton
                 style={{ position: 'absolute', top: '10px', right: '10px' }}
                 onClick={handleFilterDrawerToggle}
