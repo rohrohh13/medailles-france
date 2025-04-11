@@ -541,6 +541,7 @@ const createCustomIcon = (gender, discipline) => {
             onClose={handleFilterDrawerToggle}
             variant="temporary"
             transitionDuration={300}
+            className="filter-drawer-container"
           >
             <div className="drawer-filter" style={{ width: '400px', padding: '20px', position: 'relative' }}>
               <IconButton
