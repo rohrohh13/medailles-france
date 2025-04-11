@@ -124,16 +124,24 @@ display: inline-flex;
   position: absolute;
   top: 20px;
   z-index: 999;
+  padding: 5px 10px;
   right: 20px;
 }
 
 .button-home {
   position: absolute;
   top: 20px;
+  padding: 5px 10px;
   z-index: 999;
-  right: 90px;
+  right: 70px;
 }
-
+.button-info {
+   position: absolute;
+  top: 20px;
+  padding: 5px 10px;
+  z-index: 999;
+  right: 120px; 
+}
 .la-liste {
   background-color: #000000;
   width: 100%;
@@ -274,6 +282,7 @@ background-color: rgba(0, 0, 0, 0.6) ! important;
   padding: 20px;
   border-radius: 10px;
   font-weight: 500;
+  font-size: 30px;
   text-transform: uppercase;
   transition: all 0.3s;
 }
@@ -323,4 +332,67 @@ background-color: rgba(0, 0, 0, 0.6) ! important;
   padding-bottom: 5px;
 
   margin: 0 ! important;
+}
+
+
+
+
+.footer {
+background-color: #ffffff;
+padding-top: 10px;
+padding-bottom: 10px;
+position: fixed;
+bottom:0;
+width: 100%;
+z-index: 99999;
+display:flex;
+justify-content: space-between;
+align-items: center;
+
+}
+
+.footer p {
+  margin: 0;
+}
+
+.footerRS {
+  padding-left: 15px;
+  display: flex;
+}
+.footerRS a {
+  line-height: 1;
+}
+
+.footerRS svg {
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+.footerRS svg path {
+  stroke-width: 2px;
+}
+
+.copyright {
+  padding-right: 20px;
+  display: flex;
+}
+
+.copyright p,
+.copyright a {
+  font-size: 12px;
+  font-weight: 600;
+  color: #000000;
+}
+.copyright a {
+  color: #000000;
+  padding-right: 10px;
+  text-decoration: none;
+}
+
+
+.custom-marker-kayak .material-icons,
+.custom-marker-hand .material-icons {
+  font-size: 20px ! important;
+  color: #000000;
 }
