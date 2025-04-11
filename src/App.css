@@ -2,6 +2,24 @@
   width: 100%;
 }
 
+/* Styles pour les transitions des drawers */
+.MuiDrawer-root .MuiDrawer-paper {
+  transition: transform 225ms cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+}
+
+.MuiDrawer-root.MuiDrawer-paper {
+  box-shadow: 0px 8px 10px -5px rgba(0,0,0,0.2), 0px 16px 24px 2px rgba(0,0,0,0.14), 0px 6px 30px 5px rgba(0,0,0,0.12);
+}
+
+.MuiDrawer-root.MuiModal-root .MuiBackdrop-root {
+  opacity: 0 !important;
+  transition: opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.MuiDrawer-root.MuiModal-root.MuiDrawer-open .MuiBackdrop-root {
+  opacity: 0.5 !important;
+}
+
 .social-icon {
   color: inherit; /* Hérite de la couleur du texte */
   transition: transform 0.3s, color 0.3s;
@@ -49,8 +67,6 @@
   display: flex;
 }
 
-
-
 .medal-circle {
   display: inline-flex;
   align-items: center;
@@ -63,7 +79,7 @@
   margin-right: 5px;
 }
 .medal-circle-compteur {
-display: inline-flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 150px;
@@ -91,7 +107,10 @@ display: inline-flex;
   width: 50%;
   height: 100vh;
   overflow: scroll;
+}
 
+.droite-liste.full-width {
+  width: 100%;
 }
 
 .liste-sportif {
@@ -118,7 +137,6 @@ display: inline-flex;
 .medal-circle-bronze {
   background-color: #775e39; /* Couleur bronze */
 }
-
 
 .button-filtre {
   position: absolute;
@@ -160,14 +178,12 @@ display: inline-flex;
   justify-content: space-between;
 }
 
-
 .total-medaille {
   color: #ffffff;
   font-size: 66px;
   margin: 0;
   font-family: 'Barlow Condensed', sans-serif;
 }
-
 
 .intro-droite {
   color: #ffffff;
@@ -182,7 +198,7 @@ display: inline-flex;
 }
 
 .bloc-medaille p {
-margin: 0;
+  margin: 0;
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 40px;
   max-width: 250px;
@@ -202,7 +218,6 @@ margin: 0;
   color: #ffffff;
   padding-right: 20px;
 }
-
 
 .filter-button {
   background-color: #000000;
@@ -227,7 +242,6 @@ margin: 0;
   border-color: #000000;
 }
 
-
 .marker-cluster-large,
 .marker-cluster-medium,
 .marker-cluster-small {
@@ -240,14 +254,10 @@ background-color: rgba(0, 0, 0, 0.6) ! important;
 background-color: rgba(0, 0, 0, 0.6) ! important;
 }
 
-
-
-
 .ouvertureSite {
   background-color: #000000;
   display: block;
 }
-
 
 .ouvertureSite .MuiPaper-root {
   margin: unset ! important;
@@ -287,13 +297,10 @@ background-color: rgba(0, 0, 0, 0.6) ! important;
   transition: all 0.3s;
 }
 
-
 .le-choix div:hover {
   background-color: #000000;
   color: #ffffff;
 }
-
-
 
 .custom-marker {
   display: flex;
@@ -316,8 +323,6 @@ background-color: rgba(0, 0, 0, 0.6) ! important;
   height: 100%;
 }
 
-
-
 .popUpCarte h3 {
   font-size: 14px ! important;
   margin: 0 ! important;
@@ -330,12 +335,8 @@ background-color: rgba(0, 0, 0, 0.6) ! important;
 .popUpCarte ul li {
   font-size: 12px;
   padding-bottom: 5px;
-
   margin: 0 ! important;
 }
-
-
-
 
 .footer {
 background-color: #ffffff;
@@ -348,7 +349,6 @@ z-index: 99999;
 display:flex;
 justify-content: space-between;
 align-items: center;
-
 }
 
 .footer p {
@@ -390,9 +390,264 @@ align-items: center;
   text-decoration: none;
 }
 
-
 .custom-marker-kayak .material-icons,
 .custom-marker-hand .material-icons {
   font-size: 20px ! important;
   color: #000000;
+}
+
+/* Media Queries pour rendre le site responsive */
+
+/* Pour les tablettes (768px à 1024px) */
+@media screen and (max-width: 1024px) {
+  .medal-circle-compteur {
+    width: 100px;
+    height: 100px;
+    font-size: 60px;
+  }
+  
+  .total-medaille {
+    font-size: 50px;
+  }
+  
+  .filtre-medaille {
+    font-size: 24px;
+  }
+  
+  .bloc-medaille p {
+    font-size: 30px;
+    max-width: 200px;
+    width: 200px;
+  }
+  
+  .button-filtre, .button-home, .button-info {
+    padding: 3px 8px;
+  }
+  
+  .button-info {
+    right: 110px;
+  }
+  
+  .button-home {
+    right: 65px;
+  }
+  
+  /* Ajuster les marges/paddings pour les tablettes */
+  .bloc-medaille-div {
+    padding-bottom: 15px;
+    padding-top: 15px;
+  }
+  
+  /* S'assurer que les drawers ne sont pas trop larges */
+  .MuiDrawer-paper {
+    width: 350px !important;
+  }
+  
+  .gauche-liste, .droite-liste {
+    height: 100vh;
+  }
+}
+
+/* Pour les mobiles (moins de 768px) */
+@media screen and (max-width: 767px) {
+  /* Modifier la disposition flex en colonne pour mobile */
+  div[style*="display: flex"] {
+    flex-direction: column !important;
+  }
+  
+  /* Ajuster les largeurs pour occuper toute la largeur disponible */
+  .gauche-liste, .droite-liste, .droite-liste.full-width {
+    width: 100%;
+    height: auto;
+    min-height: 50vh;
+  }
+  
+  .gauche-liste {
+    padding: 2rem 0;
+  }
+  
+  .medal-circle-compteur {
+    width: 80px;
+    height: 80px;
+    font-size: 45px;
+    margin-bottom: 10px;
+  }
+  
+  .total-medaille {
+    font-size: 36px;
+  }
+  
+  .filtre-medaille {
+    font-size: 20px;
+  }
+  
+  .bloc-medaille p {
+    font-size: 24px;
+    max-width: 100%;
+    width: 100%;
+  }
+  
+  /* Regrouper les boutons pour qu'ils soient plus proches */
+  .button-filtre, .button-home, .button-info {
+    padding: 2px 5px;
+  }
+  
+  .button-info {
+    right: 100px;
+  }
+  
+  .button-home {
+    right: 60px;
+  }
+  
+  /* Réduire la taille des médailles */
+  .medal {
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+  }
+  
+  /* Adapter les modules de texte */
+  .bloc-medaille-div {
+    flex-direction: column;
+    padding: 10px 0;
+  }
+  
+  /* S'assurer que les drawers prennent toute la largeur sur mobile */
+  .MuiDrawer-paper {
+    width: 85% !important;
+    max-width: 300px !important;
+  }
+  
+  /* Réduire le padding à l'intérieur des drawers */
+  .MuiDrawer-paper > div {
+    padding: 15px !important;
+  }
+  
+  /* Adapter la taille des titres dans les drawers */
+  .MuiDrawer-paper h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  /* Adapter la carte pour qu'elle prenne toute la hauteur disponible */
+  .leaflet-container {
+    height: 70vh !important;
+  }
+  
+  /* Adapter la taille du filtre des boutons */
+  .filter-button {
+    font-size: 12px;
+    padding: 5px 8px;
+    margin: 3px;
+  }
+  
+  /* Adapter la fenêtre modale d'ouverture */
+  .ouvertureSite .MuiPaper-root h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  .le-choix div {
+    padding: 15px !important;
+    font-size: 16px !important;
+  }
+  
+  .main-container {
+    flex-direction: column;
+    height: auto;
+  }
+}
+
+/* Pour les petits mobiles (moins de 480px) */
+@media screen and (max-width: 480px) {
+  .medal-circle-compteur {
+    width: 60px;
+    height: 60px;
+    font-size: 32px;
+  }
+  
+  .total-medaille {
+    font-size: 28px;
+  }
+  
+  .bloc-medaille-div {
+    padding: 8px 0;
+  }
+  
+  /* Empiler les boutons de médaille sur mobile petit écran */
+  .medal-container-div {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .medal {
+    margin: 5px;
+  }
+  
+  /* Réduire encore les paddings */
+  .MuiDrawer-paper > div {
+    padding: 10px !important;
+  }
+  
+  /* Réduire la taille du footer */
+  .footer {
+    padding: 10px;
+  }
+  
+  .footerRS svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  
+  .copyright p, .copyright a {
+    font-size: 12px;
+  }
+}
+
+/* Styles communs pour les drawers */
+.drawer-content {
+  position: relative;
+  padding: 20px;
+}
+
+.athlete-drawer {
+  width: 300px;
+}
+
+.filter-drawer, .info-drawer {
+  width: 400px;
+}
+
+/* Styles responsives pour les drawers */
+@media screen and (max-width: 1024px) {
+  .filter-drawer, .info-drawer {
+    width: 350px;
+  }
+  
+  .athlete-drawer {
+    width: 280px;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .drawer-content {
+    width: 85vw;
+    max-width: 300px;
+    padding: 15px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .drawer-content {
+    width: 85vw;
+    max-width: 280px;
+    padding: 10px;
+  }
+}
+
+/* Media Queries pour rendre le site responsive */
+
+.main-container {
+  display: flex;
+  width: 100%;
+  height: 100vh;
 }
