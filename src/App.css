@@ -468,7 +468,7 @@ align-items: center;
 
 .droite-liste {
   width: 100% !important;
-
+padding-bottom: 40px;
   height: auto;
   overflow:scroll;
   min-height: 100vh;
