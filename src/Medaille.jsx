@@ -7,7 +7,7 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import FilterAltIcon from '@mui/icons-material/Tune';
 import HomeIcon from '@mui/icons-material/Home';
-import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import InfoIcon from '@mui/icons-material/Info';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import TwitterIcon from '@mui/icons-material/Twitter';
@@ -318,7 +318,7 @@ const createCustomIcon = (gender, discipline) => {
             className="button-home"
             onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
           >
-            {viewMode === 'list' ? <PublicIcon /> : <FormatListNumberedIcon />}
+            {viewMode === 'list' ? <PublicIcon /> : <WorkspacePremiumIcon />}
           </button>
           <button className="button-info" onClick={handleInfoDrawerToggle} style={{ display: 'none' }}>
             <InfoIcon />
