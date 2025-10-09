@@ -7,6 +7,7 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import FilterAltIcon from '@mui/icons-material/Tune';
 import HomeIcon from '@mui/icons-material/Home';
+import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import InfoIcon from '@mui/icons-material/Info';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import TwitterIcon from '@mui/icons-material/Twitter';
@@ -38,8 +39,8 @@ const Medaille = () => {
   const [athletes, setAthletes] = useState([]);
   const [selectedAthlete, setSelectedAthlete] = useState(null);
   const [selectedAthleteMedals, setSelectedAthleteMedals] = useState([]);
-  const [viewMode, setViewMode] = useState(null);
-  const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(true);
+const [viewMode, setViewMode] = useState('map');
+const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
 
   const [seasonFilter, setSeasonFilter] = useState([]);
   const [colorFilter, setColorFilter] = useState([]);
@@ -55,7 +56,7 @@ const Medaille = () => {
   const [winterYears, setWinterYears] = useState([]);
   const [allSexes, setAllSexes] = useState([]);
 
-  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(true);
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [isInfoDrawerOpen, setIsInfoDrawerOpen] = useState(false);
 
   useEffect(() => {
@@ -158,8 +159,9 @@ const Medaille = () => {
   };
 
   const handleHomeButtonClick = () => {
-    setViewMode(null);
-    setIsSelectionModalOpen(true);
+    setViewMode('list');       // passe à la vue liste
+    setIsSelectionModalOpen(false); // ferme le modal d’ouverture si jamais
+    setIsFilterDrawerOpen(false);   // on ne force pas l’ouverture du drawer
   };
 
   const athletesWithFilteredMedals = athletes.map(athlete => ({
@@ -312,8 +314,11 @@ const createCustomIcon = (gender, discipline) => {
           <button className="button-filtre" onClick={handleFilterDrawerToggle}>
             <FilterAltIcon />
           </button>
-          <button className="button-home" onClick={handleHomeButtonClick}>
-            <HomeIcon />
+          <button
+            className="button-home"
+            onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
+          >
+            {viewMode === 'list' ? <PublicIcon /> : <FormatListNumberedIcon />}
           </button>
           <button className="button-info" onClick={handleInfoDrawerToggle} style={{ display: 'none' }}>
             <InfoIcon />
