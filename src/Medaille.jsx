@@ -20,6 +20,7 @@ import PublicIcon from '@mui/icons-material/Public';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-markercluster';
+import TravelExploreIcon from '@mui/icons-material/TravelExplore';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
@@ -318,7 +319,7 @@ const createCustomIcon = (gender, discipline) => {
             className="button-home"
             onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
           >
-            {viewMode === 'list' ? <PublicIcon /> : <WorkspacePremiumIcon />}
+            {viewMode === 'list' ? <TravelExploreIcon /> : <WorkspacePremiumIcon />}
           </button>
           <button className="button-info" onClick={handleInfoDrawerToggle} style={{ display: 'none' }}>
             <InfoIcon />
