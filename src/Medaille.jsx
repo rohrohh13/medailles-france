@@ -570,45 +570,51 @@ const handleCheckboxChange = (setFilter, value, checked) => {
                       </>
                     ) : (
                     // ----- Affichage des athlètes -----
-                    <MarkerClusterGroup showCoverageOnHover={false}>
-                      {athletesWithFilteredMedals.map(athlete => {
-                        if (!athlete.ville_sportif_x || !athlete.ville_sportif_y) return null;
-                        return (
-                          <Marker
-                            key={athlete.id_sportif}
-                            position={[athlete.ville_sportif_x, athlete.ville_sportif_y]}
-                            icon={createCustomIcon(athlete.genre_sportif, athlete.discipline_sportif)}
-                            eventHandlers={{
-                              click: () => handleAthleteClick(athlete),
-                              mouseover: (e) => e.target.openPopup(),
-                              mouseout: (e) => e.target.closePopup(),
-                            }}
-                          >
-                            <Popup autoClose={false} closeButton={false} offset={[0, -1]}>
-                              <div className="popUpCarte">
-                                <h3>{athlete.prenom_nom_sportif}</h3>
-                                <ul style={{ padding: 0 }}>
-                                  {athlete.medals.map(medal => (
-                                    <li key={medal.id_medaille} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                                      {medal.couleur_medaille.toLowerCase() === 'or' && (
-                                        <span style={{ backgroundColor: '#ffd700', width: 15, height: 15, borderRadius: '50%', marginRight: 10 }} />
-                                      )}
-                                      {medal.couleur_medaille.toLowerCase() === 'argent' && (
-                                        <span style={{ backgroundColor: '#868992', width: 15, height: 15, borderRadius: '50%', marginRight: 10 }} />
-                                      )}
-                                      {medal.couleur_medaille.toLowerCase() === 'bronze' && (
-                                        <span style={{ backgroundColor: '#775e39', width: 15, height: 15, borderRadius: '50%', marginRight: 10 }} />
-                                      )}
-                                      {medal.annee_medaille} - {medal.discipline_medaille}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            </Popup>
-                          </Marker>
-                        );
-                      })}
-                    </MarkerClusterGroup>
+<MarkerClusterGroup
+  key={JSON.stringify(athletesWithFilteredMedals.map(a => a.id_sportif))}
+  showCoverageOnHover={false}
+>
+  {athletesWithFilteredMedals.map(athlete => {
+    if (!athlete.ville_sportif_x || !athlete.ville_sportif_y) return null;
+
+    return (
+      <Marker
+        key={athlete.id_sportif}
+        position={[athlete.ville_sportif_x, athlete.ville_sportif_y]}
+        icon={createCustomIcon(athlete.genre_sportif, athlete.discipline_sportif)}
+        eventHandlers={{
+          click: () => handleAthleteClick(athlete),
+          mouseover: (e) => e.target.openPopup(),
+          mouseout: (e) => e.target.closePopup(),
+        }}
+      >
+        <Popup autoClose={false} closeButton={false} offset={[0, -1]}>
+          <div className="popUpCarte">
+            <h3>{athlete.prenom_nom_sportif}</h3>
+            <ul style={{ padding: 0 }}>
+              {athlete.medals.map(medal => (
+                <li key={medal.id_medaille} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                  {medal.couleur_medaille.toLowerCase() === 'or' && (
+                    <span style={{ backgroundColor: '#ffd700', width: 15, height: 15, borderRadius: '50%', marginRight: 10 }} />
+                  )}
+                  {medal.couleur_medaille.toLowerCase() === 'argent' && (
+                    <span style={{ backgroundColor: '#868992', width: 15, height: 15, borderRadius: '50%', marginRight: 10 }} />
+                  )}
+                  {medal.couleur_medaille.toLowerCase() === 'bronze' && (
+                    <span style={{ backgroundColor: '#775e39', width: 15, height: 15, borderRadius: '50%', marginRight: 10 }} />
+                  )}
+                  {medal.annee_medaille} - {medal.discipline_medaille}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Popup>
+      </Marker>
+    );
+  })}
+</MarkerClusterGroup>
+
+
                   )}
                 </MapContainer>
               )}
