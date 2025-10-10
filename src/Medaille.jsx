@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo  } from 'react';
 import axios from 'axios';
 import { config } from '../config';
 import './App.css';
@@ -18,7 +18,7 @@ import AcUnitIcon from '@mui/icons-material/AcUnit';
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import PublicIcon from '@mui/icons-material/Public';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, GeoJSON, ZoomControl  } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
 import L from 'leaflet';
@@ -31,24 +31,36 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
+import GroupsIcon from '@mui/icons-material/Groups';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import LayersIcon from '@mui/icons-material/Layers';
+
 
 const medalsUrl = config.medalsUrl;
 const athletesUrl = config.athletesUrl;
 
 const Medaille = () => {
+  // ----- États principaux -----
   const [medals, setMedals] = useState([]);
   const [athletes, setAthletes] = useState([]);
+  const [athletesWithFilteredMedals, setAthletesWithFilteredMedals] = useState([]);
+  const [departementsData, setDepartementsData] = useState(null);
+
   const [selectedAthlete, setSelectedAthlete] = useState(null);
   const [selectedAthleteMedals, setSelectedAthleteMedals] = useState([]);
-const [viewMode, setViewMode] = useState('map');
-const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState('map');
+  const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  const [isInfoDrawerOpen, setIsInfoDrawerOpen] = useState(false);
 
+  // ----- Filtres -----
   const [seasonFilter, setSeasonFilter] = useState([]);
   const [colorFilter, setColorFilter] = useState([]);
   const [disciplineFilter, setDisciplineFilter] = useState([]);
   const [sexFilter, setSexFilter] = useState([]);
   const [yearFilter, setYearFilter] = useState([]);
 
+  // ----- Données auxiliaires -----
   const [allDisciplines, setAllDisciplines] = useState([]);
   const [summerDisciplines, setSummerDisciplines] = useState([]);
   const [winterDisciplines, setWinterDisciplines] = useState([]);
@@ -56,26 +68,22 @@ const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
   const [summerYears, setSummerYears] = useState([]);
   const [winterYears, setWinterYears] = useState([]);
   const [allSexes, setAllSexes] = useState([]);
+  const [showDepartments, setShowDepartments] = useState(false);
 
-  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
-  const [isInfoDrawerOpen, setIsInfoDrawerOpen] = useState(false);
-
+  // ----- Récupération des données -----
   useEffect(() => {
     axios.get(medalsUrl).then((response) => {
       const data = response.data;
       setMedals(data);
 
-      const allDisciplinesSet = [...new Set(data.map(m => m.discipline_medaille))];
-      const summerDisciplinesSet = [...new Set(data.filter(m => m.hiver_ou_ete_medaille === 'ete').map(m => m.discipline_medaille))];
-      const winterDisciplinesSet = [...new Set(data.filter(m => m.hiver_ou_ete_medaille === 'hiver').map(m => m.discipline_medaille))];
+      setAllDisciplines([...new Set(data.map(m => m.discipline_medaille))].sort());
+      setSummerDisciplines([...new Set(data.filter(m => m.hiver_ou_ete_medaille === 'ete').map(m => m.discipline_medaille))].sort());
+      setWinterDisciplines([...new Set(data.filter(m => m.hiver_ou_ete_medaille === 'hiver').map(m => m.discipline_medaille))].sort());
 
-      setAllDisciplines(allDisciplinesSet.sort());
-      setSummerDisciplines(summerDisciplinesSet.sort());
-      setWinterDisciplines(winterDisciplinesSet.sort());
+      setAllYears([...new Set(data.map(m => m.annee_medaille))].sort());
+      setSummerYears([...new Set(data.filter(m => m.hiver_ou_ete_medaille === 'ete').map(m => m.annee_medaille))].sort());
+      setWinterYears([...new Set(data.filter(m => m.hiver_ou_ete_medaille === 'hiver').map(m => m.annee_medaille))].sort());
 
-      setAllYears([...new Set(data.map(m => m.annee_medaille))]);
-      setSummerYears([...new Set(data.filter(m => m.hiver_ou_ete_medaille === 'ete').map(m => m.annee_medaille))]);
-      setWinterYears([...new Set(data.filter(m => m.hiver_ou_ete_medaille === 'hiver').map(m => m.annee_medaille))]);
       setAllSexes([...new Set(data.map(m => m.epreuve_sexe.toLowerCase()))]);
     });
 
@@ -84,29 +92,254 @@ const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
     });
   }, []);
 
-  const getFilteredDisciplines = () => {
-    if (seasonFilter.length === 0) return allDisciplines;
-    return allDisciplines.filter(discipline =>
-      medals.some(m => seasonFilter.includes(m.hiver_ou_ete_medaille) && m.discipline_medaille === discipline)
+  // ----- Médailles filtrées -----
+  const filteredMedals = useMemo(() => {
+    return medals.filter(medal => {
+      const matchesSeason = seasonFilter.length === 0 || seasonFilter.includes(medal.hiver_ou_ete_medaille);
+      const matchesColor = colorFilter.length === 0 || colorFilter.includes(medal.couleur_medaille.trim().toLowerCase());
+      const matchesDiscipline = disciplineFilter.length === 0 || disciplineFilter.includes(medal.discipline_medaille);
+      const matchesSex = sexFilter.length === 0 || sexFilter.includes(medal.epreuve_sexe.toLowerCase());
+      const matchesYear = yearFilter.length === 0 || yearFilter.includes(medal.annee_medaille);
+
+      return matchesSeason && matchesColor && matchesDiscipline && matchesSex && matchesYear;
+    });
+  }, [medals, seasonFilter, colorFilter, disciplineFilter, sexFilter, yearFilter]);
+
+  // ----- Athlètes avec leurs médailles filtrées -----
+  useEffect(() => {
+    if (!athletes.length || !filteredMedals.length) {
+      setAthletesWithFilteredMedals([]);
+      return;
+    }
+
+    const filteredAthletes = athletes.map(athlete => ({
+      ...athlete,
+      medals: filteredMedals.filter(medal =>
+        medal.athletes_id_medaille
+          .split(',')
+          .map(id => id.trim())
+          .includes(athlete.id_sportif)
+      )
+    })).filter(athlete => athlete.medals.length > 0);
+
+    setAthletesWithFilteredMedals(filteredAthletes);
+  }, [athletes, filteredMedals]);
+
+
+  // ----- GeoJSON départements -----
+  useEffect(() => {
+    fetch('/departements.geojson')
+      .then(res => res.json())
+      .then(data => setDepartementsData(data))
+      .catch(err => console.error(err));
+  }, []);
+
+
+
+
+const numClasses = 6;
+const colors = ['#a6cee3','#1f78b4','#08519c','#54278f','#3f007d','#2a004d'];
+
+// 1. Comptage des athlètes par département
+const athletesByDept = useMemo(() => {
+  return athletesWithFilteredMedals.reduce((acc, athlete) => {
+    const dept = athlete.departement_sportif?.trim();
+    if (!dept) return acc; // ignore les champs vides
+    acc[dept] = (acc[dept] || 0) + 1;
+    return acc;
+  }, {});
+}, [athletesWithFilteredMedals]);
+
+// 2. Création de classes stables
+const classIntervals = useMemo(() => {
+  const counts = Object.values(athletesByDept).filter(c => c > 0);
+  if (!counts.length) return [];
+
+  const maxCount = Math.max(...counts);
+  const minCount = Math.min(...counts);
+
+  const intervals = [];
+
+  if (maxCount <= numClasses) {
+    // Cas petit effectif : 1 classe par valeur
+    for (let i = 1; i <= maxCount; i++) {
+      intervals.push({ min: i, max: i, color: colors[i - 1] || colors[colors.length - 1] });
+    }
+  } else {
+    // Classes logarithmiques bien formées
+    const logMin = Math.log(minCount || 1);
+    const logMax = Math.log(maxCount);
+    const step = (logMax - logMin) / numClasses;
+
+    let prevMax = 0;
+    for (let i = 0; i < numClasses; i++) {
+      const minVal = Math.floor(Math.exp(logMin + i * step));
+      const maxVal = Math.floor(Math.exp(logMin + (i + 1) * step));
+
+      // éviter les chevauchements et trous
+      const adjustedMin = Math.max(prevMax + 1, minVal);
+      const adjustedMax = i === numClasses - 1 ? maxCount : Math.max(adjustedMin, maxVal);
+
+      intervals.push({ min: adjustedMin, max: adjustedMax, color: colors[i] });
+      prevMax = adjustedMax;
+    }
+  }
+
+  return intervals;
+}, [athletesByDept]);
+
+// 3. getColor avec gestion des 0 et valeurs manquantes
+const getColor = (dept) => {
+  if (!dept) return '#f0f0f0';
+  const count = athletesByDept[dept] || 0;
+  if (count === 0) return '#ffffff';
+  const interval = classIntervals.find(i => count >= i.min && count <= i.max);
+  return interval ? interval.color : colors[colors.length - 1];
+};
+
+// 4. Style carte
+const styleDepartement = (feature) => ({
+  fillColor: getColor(feature.properties.DDEP_L_LIB),
+  color: 'white',
+  weight: 1,
+  fillOpacity: 0.7,
+});
+
+
+const Legend = () => {
+  const depts = departementsData?.features?.map(f => f.properties.DDEP_L_LIB) || [];
+  const [isOpen, setIsOpen] = useState(false);
+
+  const isMobile = window.innerWidth < 600;
+
+  return (
+    <div
+      style={{
+        background: 'white',
+        borderRadius: '20px',
+        padding: '5px',
+        width: isMobile ? '150px' : '150px',
+      }}
+    >
+      <h4
+        style={{ marginTop: 0, cursor: isMobile ? 'pointer' : 'default' }}
+        onClick={() => isMobile && setIsOpen(!isOpen)}
+      >
+        Légende {isMobile && (isOpen ? '▲' : '▼')}
+      </h4>
+
+      {/* Affiche seulement si ouvert ou desktop */}
+      {(!isMobile || isOpen) &&
+        classIntervals.map((interval, index) => {
+          const countDepts = depts.filter(d => {
+            const val = athletesByDept[d] || 0;
+            return val >= interval.min && val <= interval.max;
+          }).length;
+
+          return (
+            <div
+              key={index}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '4px',
+                fontSize: isMobile ? '12px' : '12px',
+              }}
+            >
+              <div
+                style={{
+                  width: isMobile ? '15px' : '15px',
+                  height: isMobile ? '15px' : '15px',
+                  backgroundColor: interval.color,
+                  marginRight: '6px',
+                  border: '1px solid #ccc',
+                }}
+              />
+              <span>
+                {interval.min === interval.max
+                  ? `${interval.min} athlète${interval.min > 1 ? 's' : ''}`
+                  : `${interval.min} - ${interval.max} athlètes`} ({countDepts})
+              </span>
+            </div>
+          );
+        })}
+    </div>
+  );
+};
+
+
+
+
+
+
+
+
+
+
+
+  // ----- Fonctions utilitaires -----
+  const getMedalsForAthlete = (athlete) => {
+    return medals.filter(medal =>
+      medal.athletes_id_medaille
+        .split(',')
+        .map(id => id.trim())
+        .includes(athlete.id_sportif)
     );
   };
 
-  const getFilteredYears = () => {
-    if (seasonFilter.length === 0) return allYears;
-    return allYears.filter(year =>
-      medals.some(m => seasonFilter.includes(m.hiver_ou_ete_medaille) && m.annee_medaille === year)
-    );
+  const createCustomIcon = (gender, discipline) => {
+    const icons = {
+      football: '<i class="fas fa-futbol"></i>',
+      'basket-ball': '<i class="fas fa-basketball-ball"></i>',
+      'canoë-kayak': '<i class="material-icons">kayaking</i>',
+      'canoe kayak': '<i class="material-icons">kayaking</i>',
+      handball: '<i class="material-icons">sports_handball</i>',
+      surf: '<i class="material-icons">surfing</i>',
+      snowboard: '<i class="material-icons">snowboarding</i>',
+      'ski alpin': '<i class="material-icons">downhill_skiing</i>',
+      'patinage artistique': '<i class="material-icons">ice_skating</i>',
+      natation: '<i class="material-icons">pool</i>',
+      'volley-ball': '<i class="material-icons">sports_volleyball</i>',
+      voile: '<i class="material-icons">sailing</i>',
+      aviron: '<i class="material-icons">rowing</i>'
+    };
+
+    const html = icons[discipline.toLowerCase()] || (gender === 'homme' ? '♂' : '♀');
+
+    return L.divIcon({
+      className: 'custom-marker',
+      html: `<div class="marker-circle">${html}</div>`,
+      iconSize: [30, 30],
+    });
   };
 
-  const filteredMedals = medals.filter(medal => {
-    const matchesSeason = seasonFilter.length === 0 || seasonFilter.includes(medal.hiver_ou_ete_medaille);
-    const matchesColor = colorFilter.length === 0 || colorFilter.includes(medal.couleur_medaille.trim().toLowerCase());
-    const matchesDiscipline = disciplineFilter.length === 0 || disciplineFilter.includes(medal.discipline_medaille);
-    const matchesSex = sexFilter.length === 0 || sexFilter.includes(medal.epreuve_sexe.toLowerCase());
-    const matchesYear = yearFilter.length === 0 || yearFilter.includes(medal.annee_medaille);
+  // ----- Gestion interactions -----
+  const handleAthleteClick = (athlete) => {
+    setSelectedAthlete(athlete);
+    setSelectedAthleteMedals(getMedalsForAthlete(athlete));
+  };
 
-    return matchesSeason && matchesColor && matchesDiscipline && matchesSex && matchesYear;
-  });
+  const handleDrawerClose = () => setSelectedAthlete(null);
+
+  const handleFilterDrawerToggle = () => setIsFilterDrawerOpen(prev => !prev);
+
+  const handleInfoDrawerToggle = () => setIsInfoDrawerOpen(prev => !prev);
+
+  const handleViewModeSelection = (mode) => {
+    setViewMode(mode);
+    setIsSelectionModalOpen(false);
+    if (mode === 'map') setIsFilterDrawerOpen(false);
+  };
+
+  const handleHomeButtonClick = () => {
+    setViewMode('list');
+    setIsSelectionModalOpen(false);
+    setIsFilterDrawerOpen(false);
+  };
+
+  const handleCheckboxChange = (setter, value, isChecked) => {
+    setter(prev => isChecked ? [...prev, value] : prev.filter(item => item !== value));
+  };
 
   const getAthletesForMedal = (medal) => {
     if (!medal.athletes_id_medaille) return [];
@@ -114,147 +347,14 @@ const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
     return athletes.filter(athlete => athleteIds.includes(athlete.id_sportif));
   };
 
-  const getMedalsForAthlete = (athlete) => {
-    return medals.filter(medal =>
-      medal.athletes_id_medaille.split(',').map(id => id.trim()).includes(athlete.id_sportif)
-    );
-  };
-
-  const handleAthleteClick = (athlete) => {
-    console.log("Athlete clicked:", athlete);
-    setSelectedAthlete(athlete);
-    setSelectedAthleteMedals(getMedalsForAthlete(athlete));
-  };
-
-  const handleDrawerClose = () => {
-    console.log("Closing drawer for selected athlete");
-    setSelectedAthlete(null);
-  };
-
-  const handleFilterDrawerToggle = () => {
-    setIsFilterDrawerOpen(prev => !prev);
-  };
-
-  const handleInfoDrawerToggle = () => {
-    setIsInfoDrawerOpen(prev => !prev);
-  };
-
-  const handleCheckboxChange = (setter, value, isChecked) => {
-    setter(prev => isChecked ? [...prev, value] : prev.filter(item => item !== value));
-  };
-
+  // ----- Statistiques -----
   const totalMedals = medals.length;
   const filteredMedalsCount = filteredMedals.length;
-  const goldCount = filteredMedals.filter(m => m.couleur_medaille.toLowerCase() === "or").length;
-  const silverCount = filteredMedals.filter(m => m.couleur_medaille.toLowerCase() === "argent").length;
-  const bronzeCount = filteredMedals.filter(m => m.couleur_medaille.toLowerCase() === "bronze").length;
+  const goldCount = filteredMedals.filter(m => m.couleur_medaille.toLowerCase() === 'or').length;
+  const silverCount = filteredMedals.filter(m => m.couleur_medaille.toLowerCase() === 'argent').length;
+  const bronzeCount = filteredMedals.filter(m => m.couleur_medaille.toLowerCase() === 'bronze').length;
 
   const isAnyFilterApplied = seasonFilter.length > 0 || colorFilter.length > 0 || disciplineFilter.length > 0 || sexFilter.length > 0 || yearFilter.length > 0;
-
-  const handleViewModeSelection = (mode) => {
-    setViewMode(mode);
-    setIsSelectionModalOpen(false);
-    if (mode === 'map') {
-      setIsFilterDrawerOpen(false);
-    }
-  };
-
-  const handleHomeButtonClick = () => {
-    setViewMode('list');       // passe à la vue liste
-    setIsSelectionModalOpen(false); // ferme le modal d’ouverture si jamais
-    setIsFilterDrawerOpen(false);   // on ne force pas l’ouverture du drawer
-  };
-
-  const athletesWithFilteredMedals = athletes.map(athlete => ({
-    ...athlete,
-    medals: getMedalsForAthlete(athlete).filter(medal =>
-      filteredMedals.some(fm => fm.id_medaille === medal.id_medaille)
-    ),
-  })).filter(athlete => athlete.medals.length > 0);
-
-const createCustomIcon = (gender, discipline) => {
-  if (discipline.toLowerCase() === 'football') {
-    return L.divIcon({
-      className: 'custom-marker',
-      html: `<div class="marker-circle"><i class="fas fa-futbol"></i></div>`,
-      iconSize: [30, 30],
-    });
-  } else if (discipline.toLowerCase() === 'basket-ball') {
-    return L.divIcon({
-      className: 'custom-marker',
-      html: `<div class="marker-circle"><i class="fas fa-basketball-ball"></i></div>`,
-      iconSize: [30, 30],
-    });
-  } else if (discipline.toLowerCase() === 'canoë-kayak' || discipline.toLowerCase() === 'canoe kayak') {
-    return L.divIcon({
-      className: 'custom-marker custom-marker-kayak',
-      html: `<div class="marker-circle"><i class="material-icons">kayaking</i></div>`,
-      iconSize: [30, 30],
-    });
-  } else if (discipline.toLowerCase() === 'handball') {
-    return L.divIcon({
-      className: 'custom-marker custom-marker-hand',
-      html: `<div class="marker-circle"><i class="material-icons">sports_handball</i></div>`,
-      iconSize: [30, 30],
-    });
-  } else if (discipline.toLowerCase() === 'surf') {
-    return L.divIcon({
-      className: 'custom-marker custom-marker-hand',
-      html: `<div class="marker-circle"><i class="material-icons">surfing</i></div>`,
-      iconSize: [30, 30],
-    });
-  } else if (discipline.toLowerCase() === 'snowboard') {
-    return L.divIcon({
-      className: 'custom-marker custom-marker-hand',
-      html: `<div class="marker-circle"><i class="material-icons">snowboarding</i></div>`,
-      iconSize: [30, 30],
-    });
-  } else if (discipline.toLowerCase() === 'ski alpin') {
-    return L.divIcon({
-      className: 'custom-marker custom-marker-hand',
-      html: `<div class="marker-circle"><i class="material-icons">downhill_skiing</i></div>`,
-      iconSize: [30, 30],
-    });
-  } else if (discipline.toLowerCase() === 'patinage artistique') {
-    return L.divIcon({
-      className: 'custom-marker custom-marker-hand',
-      html: `<div class="marker-circle"><i class="material-icons">ice_skating</i></div>`,
-      iconSize: [30, 30],
-    });
-      } else if (discipline.toLowerCase() === 'natation') {
-    return L.divIcon({
-      className: 'custom-marker custom-marker-hand',
-      html: `<div class="marker-circle"><i class="material-icons">pool</i></div>`,
-      iconSize: [30, 30],
-    });
-  } else if (discipline.toLowerCase() === 'volley-ball') {
-    return L.divIcon({
-      className: 'custom-marker custom-marker-hand',
-      html: `<div class="marker-circle"><i class="material-icons">sports_volleyball</i></div>`,
-      iconSize: [30, 30],
-    });
-  } else if (discipline.toLowerCase() === 'voile') {
-    return L.divIcon({
-      className: 'custom-marker custom-marker-hand',
-      html: `<div class="marker-circle"><i class="material-icons">sailing</i></div>`,
-      iconSize: [30, 30],
-    });
-  } else if (discipline.toLowerCase() === 'aviron') {
-    return L.divIcon({
-      className: 'custom-marker custom-marker-hand',
-      html: `<div class="marker-circle"><i class="material-icons">rowing</i></div>`,
-      iconSize: [30, 30],
-    });
-  } else {
-    const iconHtml = gender === 'homme' ? '♂' : '♀';
-    return L.divIcon({
-      className: 'custom-marker',
-      html: `<div class="marker-circle">${iconHtml}</div>`,
-      iconSize: [30, 30],
-    });
-  }
-};
-
 
 
   return (
@@ -324,6 +424,27 @@ const createCustomIcon = (gender, discipline) => {
           <button className="button-info" onClick={handleInfoDrawerToggle} style={{ display: 'none' }}>
             <InfoIcon />
           </button>
+          {viewMode === 'map' && (
+          <button
+            className="button-layers"
+            onClick={() => setShowDepartments(prev => !prev)}
+          >
+            {showDepartments ? <GroupsIcon /> : <LayersIcon />}
+          </button>
+          )}
+          {(seasonFilter.length > 0 || colorFilter.length > 0 || disciplineFilter.length > 0 || yearFilter.length > 0) && (
+            <button
+              className="button-reset"
+              onClick={() => {
+                setSeasonFilter([]);
+                setColorFilter([]);
+                setDisciplineFilter([]);
+                setYearFilter([]);
+              }}
+            >
+              <RestartAltIcon />
+            </button>
+          )}
 
           <div className="div-not-flex" style={{ display: 'flex' }}>
             {viewMode === 'list' && (
@@ -337,6 +458,12 @@ const createCustomIcon = (gender, discipline) => {
                 </p>
               </div>
             )}
+
+
+
+
+
+
             <div className="droite-liste" style={{ width: viewMode === 'list' ? '50%' : '100%' }}>
               {viewMode === 'list' && (
                 <>
@@ -383,52 +510,92 @@ const createCustomIcon = (gender, discipline) => {
                 </>
               )}
               {viewMode === 'map' && (
-                <MapContainer center={[48.8566, 2.3522]} zoom={2} style={{ height: '100vh', width: '100%' }}>
+                <MapContainer center={[48.8566, 2.3522]} zoom={2} zoomControl={false} style={{ height: '100vh', width: '100%' }}>
                   <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   />
-                  <MarkerClusterGroup showCoverageOnHover={false}>
-                    {athletesWithFilteredMedals.map(athlete => {
-                      if (!athlete.ville_sportif_x || !athlete.ville_sportif_y) {
-                        return null; // Skip athletes without valid coordinates
-                      }
-                      return (
-                        <Marker
-                          key={athlete.id_sportif}
-                          position={[athlete.ville_sportif_x, athlete.ville_sportif_y]}
-                          icon={createCustomIcon(athlete.genre_sportif, athlete.discipline_sportif)}
-                          eventHandlers={{
-                            click: () => handleAthleteClick(athlete),
-                            mouseover: (e) => e.target.openPopup(),
-                            mouseout: (e) => e.target.closePopup(),
-                          }}
-                        >
-                          <Popup autoClose={false} closeButton={false} offset={[0, -1]}>
-                            <div className="popUpCarte">
-                              <h3>{athlete.prenom_nom_sportif}</h3>
-                              <ul style={{ padding: '0px' }}>
-                                {athlete.medals.map(medal => (
-                                  <li key={medal.id_medaille} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                                    {medal.couleur_medaille.toLowerCase() === 'or' && (
-                                      <span style={{ backgroundColor: '#ffd700', width: '15px', height: '15px', borderRadius: '50%', display: 'inline-block', marginRight: '10px' }}></span>
-                                    )}
-                                    {medal.couleur_medaille.toLowerCase() === 'argent' && (
-                                      <span style={{ backgroundColor: '#868992', width: '15px', height: '15px', borderRadius: '50%', display: 'inline-block', marginRight: '10px' }}></span>
-                                    )}
-                                    {medal.couleur_medaille.toLowerCase() === 'bronze' && (
-                                      <span style={{ backgroundColor: '#775e39', width: '15px', height: '15px', borderRadius: '50%', display: 'inline-block', marginRight: '10px' }}></span>
-                                    )}
-                                    {medal.annee_medaille} - {medal.discipline_medaille}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </Popup>
-                        </Marker>
-                      );
-                    })}
-                  </MarkerClusterGroup>
+                  {/*<ZoomControl position="bottomright" />*/}
+                  <div className="bigTitleMap">
+                    <h1>La Carte des <br/>médaillé·es français·es</h1>
+                  </div>
+                  <div className="count-medal-map">
+                    <p className="count-medal-map-title">{filteredMedalsCount} médailles</p>
+                    <p className="count-medal-map-bloc-medal">
+                      <span className="count-medal-map-medal medal-circle-gold">{goldCount}</span>
+                      <span className="count-medal-map-medal medal-circle-silver">{silverCount}</span>
+                      <span className="count-medal-map-medal medal-circle-bronze">{bronzeCount}</span>
+                    </p>
+                  </div>
+
+
+
+                    {showDepartments ? (
+                      <>
+                        {/* ----- Affichage des départements ----- */}
+                        {departementsData && (
+                          <GeoJSON
+                            data={departementsData}
+                            style={styleDepartement}
+                          />
+                        )}
+
+                        {/* ----- Légende ----- */}
+                        <div className="legendMobile" style={{
+                          position: 'absolute', // pour que la légende soit par-dessus la carte
+                          bottom: 60,
+                          right: 20,
+                          background: 'white',
+                          padding: '10px',
+                          borderRadius: '8px',
+                          boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+                          zIndex: 1000
+                        }}>
+                          <Legend />
+                        </div>
+                      </>
+                    ) : (
+                    // ----- Affichage des athlètes -----
+                    <MarkerClusterGroup showCoverageOnHover={false}>
+                      {athletesWithFilteredMedals.map(athlete => {
+                        if (!athlete.ville_sportif_x || !athlete.ville_sportif_y) return null;
+                        return (
+                          <Marker
+                            key={athlete.id_sportif}
+                            position={[athlete.ville_sportif_x, athlete.ville_sportif_y]}
+                            icon={createCustomIcon(athlete.genre_sportif, athlete.discipline_sportif)}
+                            eventHandlers={{
+                              click: () => handleAthleteClick(athlete),
+                              mouseover: (e) => e.target.openPopup(),
+                              mouseout: (e) => e.target.closePopup(),
+                            }}
+                          >
+                            <Popup autoClose={false} closeButton={false} offset={[0, -1]}>
+                              <div className="popUpCarte">
+                                <h3>{athlete.prenom_nom_sportif}</h3>
+                                <ul style={{ padding: 0 }}>
+                                  {athlete.medals.map(medal => (
+                                    <li key={medal.id_medaille} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                                      {medal.couleur_medaille.toLowerCase() === 'or' && (
+                                        <span style={{ backgroundColor: '#ffd700', width: 15, height: 15, borderRadius: '50%', marginRight: 10 }} />
+                                      )}
+                                      {medal.couleur_medaille.toLowerCase() === 'argent' && (
+                                        <span style={{ backgroundColor: '#868992', width: 15, height: 15, borderRadius: '50%', marginRight: 10 }} />
+                                      )}
+                                      {medal.couleur_medaille.toLowerCase() === 'bronze' && (
+                                        <span style={{ backgroundColor: '#775e39', width: 15, height: 15, borderRadius: '50%', marginRight: 10 }} />
+                                      )}
+                                      {medal.annee_medaille} - {medal.discipline_medaille}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </Popup>
+                          </Marker>
+                        );
+                      })}
+                    </MarkerClusterGroup>
+                  )}
                 </MapContainer>
               )}
             </div>
@@ -557,7 +724,7 @@ const createCustomIcon = (gender, discipline) => {
             onClose={handleFilterDrawerToggle}
             variant="temporary"
             transitionDuration={300}
-          >
+           >
             <div className="drawer-filter" style={{ width: '400px', padding: '20px', position: 'relative', paddingBottom: '80px' }}>
               <IconButton
                 style={{ position: 'absolute', top: '10px', right: '10px' }}
