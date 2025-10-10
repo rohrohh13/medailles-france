@@ -93,17 +93,22 @@ const Medaille = () => {
   }, []);
 
   // ----- Médailles filtrées -----
-  const filteredMedals = useMemo(() => {
-    return medals.filter(medal => {
-      const matchesSeason = seasonFilter.length === 0 || seasonFilter.includes(medal.hiver_ou_ete_medaille);
-      const matchesColor = colorFilter.length === 0 || colorFilter.includes(medal.couleur_medaille.trim().toLowerCase());
-      const matchesDiscipline = disciplineFilter.length === 0 || disciplineFilter.includes(medal.discipline_medaille);
-      const matchesSex = sexFilter.length === 0 || sexFilter.includes(medal.epreuve_sexe.toLowerCase());
-      const matchesYear = yearFilter.length === 0 || yearFilter.includes(medal.annee_medaille);
+const filteredMedals = useMemo(() => {
+  return medals.filter(medal => {
+    const matchesSeason = seasonFilter.length === 0 || seasonFilter.includes(medal.hiver_ou_ete_medaille);
+    const matchesColor = colorFilter.length === 0 || colorFilter.includes(medal.couleur_medaille.trim().toLowerCase());
+    const matchesDiscipline = disciplineFilter.length === 0 || disciplineFilter.includes(medal.discipline_medaille);
+    const matchesSex = sexFilter.length === 0 || sexFilter.includes(medal.epreuve_sexe.toLowerCase());
+    const matchesYear = yearFilter.length === 0 || yearFilter.includes(medal.annee_medaille);
 
-      return matchesSeason && matchesColor && matchesDiscipline && matchesSex && matchesYear;
-    });
-  }, [medals, seasonFilter, colorFilter, disciplineFilter, sexFilter, yearFilter]);
+    // Garde la médaille sélectionnée toujours visible
+    const selectedMedalIds = selectedAthleteMedals.map(m => m.id_medaille);
+    const isSelected = selectedMedalIds.includes(medal.id_medaille);
+
+    return (matchesSeason && matchesColor && matchesDiscipline && matchesSex && matchesYear) || isSelected;
+  });
+}, [medals, seasonFilter, colorFilter, disciplineFilter, sexFilter, yearFilter, selectedAthleteMedals]);
+
 
   // ----- Athlètes avec leurs médailles filtrées -----
   useEffect(() => {
@@ -132,6 +137,7 @@ const Medaille = () => {
       .then(res => res.json())
       .then(data => setDepartementsData(data))
       .catch(err => console.error(err));
+
   }, []);
 
 
@@ -544,6 +550,7 @@ const handleCheckboxChange = (setFilter, value, checked) => {
                           <GeoJSON
                             data={departementsData}
                             style={styleDepartement}
+                             key={JSON.stringify(athletesByDept)}
                           />
                         )}
 
