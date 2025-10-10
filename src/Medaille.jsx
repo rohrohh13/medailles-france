@@ -337,10 +337,17 @@ const Legend = () => {
     setIsFilterDrawerOpen(false);
   };
 
-  const handleCheckboxChange = (setter, value, isChecked) => {
-    setter(prev => isChecked ? [...prev, value] : prev.filter(item => item !== value));
-  };
-
+const handleCheckboxChange = (setFilter, value, checked) => {
+  setFilter(prev => {
+    if (checked) {
+      // ajouter seulement si pas déjà présent
+      return prev.includes(value) ? prev : [...prev, value];
+    } else {
+      // retirer
+      return prev.filter(v => v !== value);
+    }
+  });
+};
   const getAthletesForMedal = (medal) => {
     if (!medal.athletes_id_medaille) return [];
     const athleteIds = medal.athletes_id_medaille.split(',').map(id => id.trim());
