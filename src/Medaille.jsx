@@ -70,6 +70,11 @@ const Medaille = () => {
   const [allSexes, setAllSexes] = useState([]);
   const [showDepartments, setShowDepartments] = useState(false);
 
+
+
+
+
+
   // ----- Récupération des données -----
   useEffect(() => {
     axios.get(medalsUrl).then((response) => {
@@ -101,13 +106,9 @@ const filteredMedals = useMemo(() => {
     const matchesSex = sexFilter.length === 0 || sexFilter.includes(medal.epreuve_sexe.toLowerCase());
     const matchesYear = yearFilter.length === 0 || yearFilter.includes(medal.annee_medaille);
 
-    // Garde la médaille sélectionnée toujours visible
-    const selectedMedalIds = selectedAthleteMedals.map(m => m.id_medaille);
-    const isSelected = selectedMedalIds.includes(medal.id_medaille);
-
-    return (matchesSeason && matchesColor && matchesDiscipline && matchesSex && matchesYear) || isSelected;
+    return matchesSeason && matchesColor && matchesDiscipline && matchesSex && matchesYear;
   });
-}, [medals, seasonFilter, colorFilter, disciplineFilter, sexFilter, yearFilter, selectedAthleteMedals]);
+}, [medals, seasonFilter, colorFilter, disciplineFilter, sexFilter, yearFilter]);
 
 
   // ----- Athlètes avec leurs médailles filtrées -----
@@ -368,6 +369,24 @@ const handleCheckboxChange = (setFilter, value, checked) => {
   const bronzeCount = filteredMedals.filter(m => m.couleur_medaille.toLowerCase() === 'bronze').length;
 
   const isAnyFilterApplied = seasonFilter.length > 0 || colorFilter.length > 0 || disciplineFilter.length > 0 || sexFilter.length > 0 || yearFilter.length > 0;
+useEffect(() => {
+  if (selectedAthlete) {
+    // Vérifie si l'athlète sélectionné existe toujours dans les athlètes filtrés
+    const stillExists = athletesWithFilteredMedals.some(
+      a => a.id_sportif === selectedAthlete.id_sportif
+    );
+    if (!stillExists) {
+      setSelectedAthlete(null);
+      setSelectedAthleteMedals([]);
+    } else {
+      // Si l'athlète existe, mettre à jour ses médailles selon le filtre
+      const athlete = athletesWithFilteredMedals.find(
+        a => a.id_sportif === selectedAthlete.id_sportif
+      );
+      setSelectedAthleteMedals(athlete.medals);
+    }
+  }
+}, [athletesWithFilteredMedals, selectedAthlete]);
 
 
   return (
